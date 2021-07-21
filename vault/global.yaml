@@ -1,0 +1,13 @@
+global:
+  enabled: true
+  tlsDisable: false
+
+ui:
+  enabled: true
+  serviceType: "LoadBalancer"
+  serviceNodePort: null
+  externalPort: 8200
+
+  #loadBalancerSourceRanges:
+  #   - < Your IP RANGE Ex. 10.0.0.0/16 >
+  #   - < YOUR SINGLE IP Ex. 1.78.23.3/32 >
