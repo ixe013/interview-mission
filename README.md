@@ -2,28 +2,9 @@
 
 This is the code to acheive a mission given by an undisclosed (aka secret) company, as part of their interview process
 
-
-# Created the cluster 
-
-```
-eksctl create cluster \
---name artiq-mission \
---region us-east-2 \
---with-oidc \
---ssh-access \
---ssh-public-key PARALINT-04 \
---managed
-```
-
 # Deploy Vault
 
 Followed the [Vault on Kubernetes Deployment Guide](https://learn.hashicorp.com/tutorials/vault/kubernetes-raft-deployment-guide?in=vault/kubernetes)
-
-## Give Vault its own namespace
-```
-kubectl create namespace vault
-kubectl config set-context --current --namespace=vault
-```
 
 ## Create fundamental secrets
 
@@ -31,8 +12,9 @@ These are the secrets Vault needs to run
 
 ### Auto-unseal
 ```
-export AWS_ACCESS_KEY_ID=AKIASXY2YF56XD7YIIH7
-export AWS_SECRET_ACCESS_KEY=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
+export AWS_ACCESS_KEY_ID=AKIASXY2YF56RKE5HY72
+read -s -p "Enter the secret access key for $AWS_ACCESS_KEY_ID: " AWS_SECRET_ACCESS_KEY
+export AWS_SECRET_ACCESS_KEY
 
 kubectl create secret generic eks-creds --from-literal=AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID?}" --from-literal=AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY?}"
 ```
@@ -74,31 +56,7 @@ EOF
 
 openssl rsa -out vault/key.pem << EOF
 -----BEGIN RSA PRIVATE KEY-----
-MIIEowIBAAKCAQEAwaga3eiOpMUEbsWt09Ct0/Xzi3yt0pSh1bwOfVD/l1duvt8+
-qn7pWPFQhlbm0H3Rg5akd4dEuC4VZlDDzj13wRaUYrt8WfUvp2F8bigIvi3lJ5uB
-EHc0kDqct0s0XMLzZreFDtmm57muLkb2tKj2vkCZJ3ucPvc8GrrqJpOFKh/3S11F
-yJgbUmNPs+tMx+4dKhnoPS6FufDeOHpVFIrCsQF39vlHBHiL8aDfNj+RS14JyGSJ
-2A+u/46ECdKGK2YJs1sQvTAHy7nET3AalfdFbUwK/rST3jpoWQWrWdt6HAoGcOVr
-F6e8dlWyiGLRMb4oJ8NNPiaTFQwjEnTd3L1xVwIDAQABAoIBAQCi2H+vN04sFFiD
-5cskoQhrgxlHpJJuz/m+x6LPkns7gpRoAUarDImg91ulfBIgJI04QEcRFDifQHFS
-VnwxQ9MeFaS12b7ZzqpB8GI4J4YilmlqgwNnGzaiSgdawuzHTFBtgclsEW6e0a88
-zwPKK4NBvQSNBQ8Ai9qJB8C6q7aBEmV/faQeOSehCEOh14XDxhf0CAG6nz8tt6qP
-mVDPgGJqZ60XQsPp4OjKnz2SCEDutD4YjXxtfLE6xjnGgNeB/7G72KOGmWjxXMW7
-kC5X4Pehyz811dz15zf9aECv7j3cUcyZ7Me37hFGJtcbGNzEw2DpBhmUWRJGts0n
-z2BHBbaBAoGBAOkM59a61CF/OgEVHM18Y22PfOB412qybv94LozE9FhV4KcyzcLQ
-+f0op+Vh6PIngMPyAw1zruYpBFyIIQuoeYY4tt6LbP1IYrNFxLNmdMxVUMP22k/u
-FQHGh7X6rGVlF7Y3GetgVOLtVkLkpiCugLofbWfxZ/lXNOTzQ2PQM8n3AoGBANS6
-GdAHW8PReJIWaEQsbbEIu+dgl8JY0F1F0d7Yiu7J3IE1EaVryCBN8o4lgqd4H7I8
-QzG9A3xjkBahtJwCVA68lW1U/xZ3YnE9TBxZqfXADVVjhr/Rndym1k0vUv1dbx4p
-FYvA2O8gEfvABHy4RP5qHQtVQsrVZ+MgtITcfLuhAoGAHtsDkw2XanvyzRPjhV1T
-uLzHttypAMpxIcfiueaVx2BPZzO1xHZwstEAMcGd2vnZ9ZeESfKoFHcXybyIS4fZ
-1yiJJbvmCT7dOokhOvN0wV0GXXvAeda2105Wx4RR8PbKheiTuPM/KfBsfFzTlf4k
-sv/YN2vh7URbj3iZ0oxNXw8CgYAQk6v9RQWGneUqZSqc3WVy3T5fSmypDWi3TACN
-wAwbjYlsXClS3bJLqidTomKrEDZQGlgWISeLYurQiKtdWOUZ/OIcEfqK0qTONDuh
-He+boeqoE8hlXD1T+4BJpX1vFv/YttTh/hYplDMyjgULfwSJWtWGk49P5Q9iaKMI
-k3H44QKBgAzLkzr54ZAiRmW1xLLotnjl83wsO6k6d+js/Va9oLc4Lv6FvivmNeMb
-+xC/RIh/6SH5uLFupMfOzdAVXUb2lk8omLhs+kcIckGuLAEYs8HIkEbVeXzUCmTQ
-jmZiE2c40UhypVNFDi0UTGr/eFAfNOi5SlJirIqBF2TiRYE2bJWx
+key here...
 -----END RSA PRIVATE KEY-----
 EOF
 
@@ -175,6 +133,7 @@ EOF
 kubectl --namespace=vault create secret generic tls-ca --from-file vault/ca-chain.pem
 ```
 
+# Deploy manually
 ```
 helm template vault hashicorp/vault --namespace vault \
     --values vault/global.yaml \
@@ -184,8 +143,28 @@ kubectl apply --filename vault/build.yaml
 ```
 
 # Initialze and run
-
 ```
 kubectl exec -it vault-0 -- /bin/sh -c "VAULT_ADDR=https://vault-0.vault-internal.vault.svc.cluster.local:8200 vault status"
-kubectl exec -it vault-0 -- /bin/sh -c "VAULT_ADDR=https://vault-0.vault-internal.vault.svc.cluster.local:8200 vault operator init" | tee vault/keys.txt
+kubectl exec -it vault-0 -- /bin/sh -c "VAULT_ADDR=https://vault-0.vault-internal.vault.svc.cluster.local:8200 vault operator init"
+```
+
+# Dynamic secrets
+
+## Setup
+```
+kubectl exec -it vault-0 -- /bin/sh -c "VAULT_ADDR=https://vault-0.vault-internal.vault.svc.cluster.local:8200 vault secrets enable database"
+kubectl exec -it vault-0 -- /bin/sh -c "VAULT_ADDR=https://vault-0.vault-internal.vault.svc.cluster.local:8200 vault write database/config/mysql plugin_name=mysql-database-plugin connection_url='{{username}}:{{password}}@tcp(mysql.databases.svc.cluster.local:3306)/' allowed_roles=readonly username=root password=$ROOT_PASSWORD"
+kubectl exec -it vault-0 -- /bin/sh -c "VAULT_ADDR=https://vault-0.vault-internal.vault.svc.cluster.local:8200 vault write database/roles/readonly db_name=mysql creation_statements=\"CREATE USER '{{name}}'@'%' IDENTIFIED BY '{{password}}';GRANT SELECT ON *.* TO '{{name}}'@'%';\" default_ttl=1h max_ttl=24h"
+```
+
+## Use
+```
+# Get the credentials
+kubectl exec -it vault-0 -- /bin/sh -c "VAULT_ADDR=https://vault-0.vault-internal.vault.svc.cluster.local:8200 vault read database/creds/readonly"
+
+# Start a container that has the mysql client
+kubectl run mysql-client --rm --tty -i --restart='Never' --image  docker.io/bitnami/mysql:8.0.25-debian-10-r37 --namespace databases --command -- bash
+
+# Login
+mysql -h mysql.databases.svc.cluster.local -uv-root-readonly-V5o39qrGOnBjjBFD -p my_database
 ```
